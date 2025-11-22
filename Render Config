@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: eagler-server
+    env: docker
+    plan: free
+    region: oregon
+    branch: main
+    numInstances: 1
+    healthCheckPath: /
+    envVars:
+      - key: EULA
+        value: true
+    startCommand: ./start.sh
