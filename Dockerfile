@@ -1,5 +1,5 @@
 # Use Java 16 (Best for 1.16.5)
-FROM openjdk:16-jdk-alpine
+FROM eclipse-temurin:17-jdk-alpine
 
 # Install dependencies
 RUN apk add --no-cache bash curl wget
