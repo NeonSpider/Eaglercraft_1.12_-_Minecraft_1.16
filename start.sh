@@ -1,26 +1,23 @@
 #!/bin/bash
-echo "--- STARTING RAILWAY HYBRID SERVER (MEMORY OPTIMIZED) ---"
+echo "--- STARTING RAILWAY HYBRID SERVER (FINAL OPTIMIZATION) ---"
 
-# Set EULA for Paper
+# --- 1. START WATERFALL PROXY FIRST (Answers Render Health Check) ---
+cd /app/proxy
+# ALLOCATING 128MB MAX RAM FOR THE PROXY
+echo "--> Launching Waterfall Proxy (Max 128M RAM) to prevent timeout..."
+java -Xms64M -Xmx128M -jar waterfall.jar &
+WATERFALL_PID=$!
+
+# --- 2. SETUP AND START PAPER BACKEND (Runs in Background) ---
 cd /app/server
 if [ ! -f eula.txt ]; then
     echo "eula=true" > eula.txt
 fi
 
-# Start Paper 1.16.5 (Backend)
-# *** CRITICAL FIX: REDUCED MAX RAM TO 256MB ***
-echo "--> Launching Paper 1.16.5 (Max 256M RAM)..."
+# ALLOCATING 256MB MAX RAM FOR THE GAME SERVER
+echo "--> Launching Paper 1.16.5 (Max 256M RAM) in background..."
 java -Xms128M -Xmx256M -jar paper.jar nogui &
 PAPER_PID=$!
 
-echo "Waiting 30s for backend to initialize..."
-sleep 30
-
-# Start Waterfall (Proxy)
-cd /app/proxy
-# *** CRITICAL FIX: REDUCED MAX RAM TO 128MB ***
-echo "--> Launching Waterfall Proxy (Max 128M RAM)..."
-java -Xms64M -Xmx128M -jar waterfall.jar &
-WATERFALL_PID=$!
-
+# Wait for both processes to finish (i.e., keep the container running)
 wait $PAPER_PID $WATERFALL_PID
